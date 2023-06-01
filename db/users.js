@@ -21,7 +21,29 @@ async function createUser({ username, password }) {
   return user;
 }
 
-async function getUser({ username, password }) {}
+async function getUser({ username, password }) {
+  const {
+    rows: [user],
+  } = await client.query(
+    `
+    SELECT *
+    FROM users
+    WHERE "username"=$1
+
+
+  `[username]
+  );
+
+  if (!user) {
+    throw new Error('No user found');
+  }
+
+  if (user.password === password) {
+    return user;
+  } else {
+    throw new Error('Incorrect password');
+  }
+}
 
 async function getUserById(userId) {}
 
