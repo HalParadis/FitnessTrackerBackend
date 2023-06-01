@@ -8,8 +8,6 @@ const {
   getRoutinesWithoutActivities,
   getAllActivities,
   addActivityToRoutine,
-
-
 } = require('./db');
 
 async function dropTables() {
@@ -17,10 +15,10 @@ async function dropTables() {
     console.log("Dropping All Tables...");
     // drop all tables, in the correct order
     await client.query(`
-      DROP TABLE IF EXISTS users;
-      DROP TABLE IF EXISTS activities;
-      DROP TABLE IF EXISTS routines;
       DROP TABLE IF EXISTS "routines_activities";
+      DROP TABLE IF EXISTS routines;
+      DROP TABLE IF EXISTS activities;
+      DROP TABLE IF EXISTS users;
     `);
     
     console.log("Finished dropping tables!");
