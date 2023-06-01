@@ -4,33 +4,69 @@ const client = require("./client")
 const {
   createUser,
   createActivity,
+  createRoutine,
+  getRoutinesWithoutActivities,
+  getAllActivities,
+  addActivityToRoutine,
+
 
 } = require('./db');
 
 async function dropTables() {
   try {
-    console.log("Dropping All Tables...")
-  // drop all tables, in the correct order
+    console.log("Dropping All Tables...");
+    // drop all tables, in the correct order
     await client.query(`
       DROP TABLE IF EXISTS users;
       DROP TABLE IF EXISTS activities;
       DROP TABLE IF EXISTS routines;
-      DROP TABLE IF EXISTS "routinesActivities";
-
-
-    `)
+      DROP TABLE IF EXISTS "routines_activities";
+    `);
+    
+    console.log("Finished dropping tables!");
+  } catch (error) {
+    console.log("Error while dropping tables!")
+    throw error;
   }
 }
 
 async function createTables() {
   try {
     console.log("Starting to build tables...")
-  // create all tables, in the correct order
+    // create all tables, in the correct order
     await client.query(`
      CREATE TABLE users(
-      id 
-     )
-    `)
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password VARCHAR(255) NOT NULL,
+     );
+
+     CREATE TABLE activities(
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) UNIQUE NOT NULL,
+      description TEXT NOT NULL,
+     );
+
+     CREATE TABLE routines(
+      id SERIAL PRIMARY KEY,
+      "creatorId" INTEGER REFERENCES users(id),
+      "isPublic" BOOLEAN DEFAULT false,
+      name VARCHAR(255) UNIQUE NOT NULL,
+      goal TEXT NOT NULL
+     );
+     
+     CREATE TABLE routines_activities(
+      id SERIAL PRIMARY KEY,
+      "routineId" UNIQUE INTEGER REFEREENCES routines(id),
+      "activityId" UNIQUE INTEGER REFERENCES activities(id),
+      duration INTEGER
+      count INTEGER
+     );
+
+    `);
+  } catch (error) {
+    console.log("Error construction tables!");
+    throw error;
   }
 }
 
