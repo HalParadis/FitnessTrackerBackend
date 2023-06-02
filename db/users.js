@@ -1,53 +1,72 @@
 const client = require('./client');
-const bcrypt = require('bcrypt');
+//const bcrypt = require('bcrypt');
 
 // database functions
 
 // user functions
 async function createUser({ username, password }) {
-  const {
-    rows: [user],
-  } = await client.query(
-    `
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `
     INSERT INTO users(username, password)
     VALUES($1, $2)
-    ON CONFLICT (username) DO NOTHING
-    RETURNING *;
+    ON CONFLICT (USERNAME) DO NOTHING
+    RETURNING *
     
     `,
-    [username, password]
-  );
+      [username, password]
+    );
 
-  return user;
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 async function getUser({ username, password }) {
-  const {
-    rows: [user],
-  } = await client.query(
-    `
-    SELECT *
-    FROM users
-    WHERE "username"=$1
-
-
-  `[username]
-  );
-
-  if (!user) {
-    throw new Error('No user found');
-  }
-
-  if (user.password === password) {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(`
+      SELECT id, username, password
+      FROM users WHERE username =${username} and password =${password}
+    `);
     return user;
-  } else {
-    throw new Error('Incorrect password');
+  } catch (err) {
+    console.error(err);
   }
 }
 
-async function getUserById(userId) {}
+async function getUserById(userId) {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(`
+      SELECT id, username, password
+      FROM users WHERE id =${userId} 
+    `);
+    return user;
+  } catch (err) {
+    console.error(err);
+  }
+}
 
-async function getUserByUsername(userName) {}
+async function getUserByUsername(userName) {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(`
+      SELECT id, username, password
+      FROM users WHERE username =${userName} 
+    `);
+    return user;
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 module.exports = {
   createUser,
