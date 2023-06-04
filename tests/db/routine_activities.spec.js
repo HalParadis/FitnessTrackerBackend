@@ -118,7 +118,7 @@ describe("DB Routine Activities", () => {
       );
       expect(deletedRoutine.id).toBe(fakeRoutineActivity.id);
       const { rows } = await client.query(`
-          SELECT * FROM routine_activities
+          SELECT * FROM routines_activities
           WHERE id = ${deletedRoutine.id}
         `);
       expect(rows.length).toBe(0);

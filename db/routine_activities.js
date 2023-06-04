@@ -19,15 +19,77 @@ async function addActivityToRoutine({
   return routine_activity;
 }
 
-async function getRoutineActivityById(id) {}
+async function getRoutineActivityById(id) {
+  const {rows: [routineActivity]} = await client.query(`
+    SELECT *
+    FROM 
+      routines_activities
+    WHERE
+      id=$1;
+  `, [id]);
+  return routineActivity;
+}
 
-async function getRoutineActivitiesByRoutine({ id }) {}
+async function getRoutineActivitiesByRoutine({ id }) {
+  const {rows: routineActivities} = await client.query(`
+    SELECT *
+    FROM 
+      routines_activities
+    WHERE
+      "routineId"=$1;
+`, [id]);
 
-async function updateRoutineActivity({ id, ...fields }) {}
+return routineActivities;
+}
 
-async function destroyRoutineActivity(id) {}
+async function updateRoutineActivity({ id, ...fields }) {
+  const setString = Object.keys(fields).map(
+    (key, index) => `"${key}"=$${index + 1}`
+  ).join(', ');
 
-async function canEditRoutineActivity(routineActivityId, userId) {}
+  if (setString.length === 0) return;
+
+  const {rows: [routineActivity]} = await client.query(`
+    UPDATE routines_activities 
+    SET ${setString}
+    WHERE id=${id}
+    RETURNING *;
+  `, [...Object.values(fields)]);
+
+  return routineActivity;
+}
+
+async function destroyRoutineActivity(id) {
+  const {rows: [routineActivity]} = await client.query(`
+    DELETE FROM 
+      routines_activities
+    WHERE
+      id=$1
+    RETURNING *;
+  `, [id]);
+
+  return routineActivity;
+}
+
+async function canEditRoutineActivity(routineActivityId, userId) {
+  const {rows: [{routineId}]} = await client.query(`
+    SELECT *
+    FROM 
+      routines_activities
+    WHERE
+      id=$1;
+  `, [routineActivityId]);
+
+  const {rows: [{id}]} = await client.query(`
+    SELECT *
+    FROM
+      users
+    WHERE
+      id=$1;
+  `, [routineId]);
+
+  return id == userId;
+}
 
 module.exports = {
   getRoutineActivityById,

@@ -3,7 +3,7 @@ const client = require("./client");
 async function createRoutine({ creatorId, isPublic, name, goal }) {
   const {rows: [routine]} = await client.query(`
     INSERT INTO 
-      routines(creatorId, isPublic, name, goal)
+      routines("creatorId", "isPublic", name, goal)
     VALUES
       ($1, $2, $3, $4)
     ON CONFLICT 
@@ -14,7 +14,16 @@ async function createRoutine({ creatorId, isPublic, name, goal }) {
   return routine;
 }
 
-async function getRoutineById(id) {}
+async function getRoutineById(id) {
+  const {rows: [routine]} = await client.query(`
+    SELECT * 
+    FROM 
+      routines
+    WHERE
+      id=$1;
+  `, [id]);
+  return routine;
+}
 
 async function getRoutinesWithoutActivities() {
   const {rows: routines} = await client.query(`
