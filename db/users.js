@@ -7,11 +7,8 @@ const bcrypt = require('bcrypt');
 async function createUser({ username, password }) {
   const SALT_COUNT = 10;
   const hashedPassword = await bcrypt.hash(password, SALT_COUNT);
-  
-  const {
-    rows: [user],
-  } = await client.query(
-    `
+
+  const { rows: [user] } = await client.query(`
     INSERT INTO 
       users(username, password)
     VALUES
@@ -19,41 +16,51 @@ async function createUser({ username, password }) {
     ON CONFLICT 
       (username) DO NOTHING
     RETURNING *;
-    
-    `,
-    [username, hashedPassword]
-  );
+    `, [username, hashedPassword]);
 
+  delete user.password;
   return user;
 }
 
 async function getUser({ username, password }) {
-  const {
-    rows: [user],
-  } = await client.query(
-    `
-    SELECT *
-    FROM users
-    WHERE "username"=$1
-
-
-  `[username]
-  );
+  
+  const user = await getUserByUsername(username);
 
   if (!user) {
     throw new Error('No user found');
   }
 
-  if (await bcrypt.compare(user.password, password)) {
+  const hashedPassword = user.password;
+  const passwordsMatch = await bcrypt.compare(password, hashedPassword);
+    
+  if (passwordsMatch) {
+    delete user.password;
     return user;
-  } else {
-    throw new Error('Incorrect password');
+  // } else {
+  //   throw new Error('Incorrect password');
   }
 }
 
-async function getUserById(userId) {}
+async function getUserById(userId) {
+  const { rows: [user] } = await client.query(`
+    SELECT *
+    FROM users
+    WHERE id=$1;
+  `, [userId]);
 
-async function getUserByUsername(userName) {}
+  delete user.password;
+  return user;
+}
+
+async function getUserByUsername(userName) { 
+  const { rows: [user] } = await client.query(`
+    SELECT *
+    FROM users
+    WHERE "username"=$1;
+  `, [userName]);
+
+  return user;
+}
 
 module.exports = {
   createUser,
