@@ -32,7 +32,18 @@ async function getRoutinesWithoutActivities() {
   return routines;
 }
 
-async function getAllRoutines() {}
+async function getAllRoutines() {
+  const { rows: routines } = await client.query(`
+    SELECT 
+      r.*, a.*, ra."routineId", ra."activityId", 
+      ra.duration, ra.count, u.username as "creatorName" 
+    FROM routines r
+    JOIN users u ON u.id = r."creatorId"
+    JOIN routines_activities ra ON ra."routineId" = r.id
+    JOIN activities a ON ra."activityId" = a.id;
+  `)
+  return routines;
+}
 
 async function getAllPublicRoutines() {}
 
