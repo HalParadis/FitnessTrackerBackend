@@ -1,5 +1,10 @@
 const client = require("./client");
 
+const {
+  getRoutineActivitiesByRoutine,
+  destroyRoutineActivity
+} = require("./routine_activities")
+
 async function createRoutine({ creatorId, isPublic, name, goal }) {
   const {rows: [routine]} = await client.query(`
     INSERT INTO 
@@ -73,17 +78,65 @@ async function getAllActivitiesForRoutineId(routineId) {
   return activities;
 }
 
-async function getAllPublicRoutines() {}
+async function getAllPublicRoutines() {
+  const routines = await getAllRoutines();
+  return routines.filter(routine => routine.isPublic);
+}
 
-async function getAllRoutinesByUser({ username }) {}
+async function getAllRoutinesByUser({ username }) {
+  const routines = await getAllRoutines();
+  return routines.filter(routine => routine.creatorName === username);
+}
 
-async function getPublicRoutinesByUser({ username }) {}
+async function getPublicRoutinesByUser({ username }) {
+  const routines = await getAllRoutinesByUser({ username });
+  return routines.filter(routine => routine.isPublic);
+}
 
-async function getPublicRoutinesByActivity({ id }) {}
+async function getPublicRoutinesByActivity({ id }) {
+  const routines = await getAllPublicRoutines();
+  return routines.filter(routine => 
+    routine.activities.find(activity => 
+      activity.id === id));
+}
 
-async function updateRoutine({ id, ...fields }) {}
+async function updateRoutine({ id, ...fields }) {
+  const setString = Object.keys(fields).map(
+    (key, index) => `"${ key }"=$${ index + 1 }`
+  ).join(', ');
 
-async function destroyRoutine(id) {}
+  if (setString.length === 0) {
+    return;
+  }
+
+  const { rows: [ routine ] } = await client.query(`
+    UPDATE routines
+    SET ${ setString }
+    WHERE id=${ id }
+    RETURNING *;
+  `, [...Object.values(fields)]);
+
+  return routine;
+}
+
+async function destroyRoutine(id) {
+  const routineToDelete = await getRoutineById(id);
+
+  const routineActivities = await getRoutineActivitiesByRoutine(routineToDelete);
+
+  routineActivities.forEach(async routineActivity => 
+    await destroyRoutineActivity(routineActivity.id)); 
+  
+  const {rows: [routine]} = await client.query(`
+    DELETE FROM
+      routines
+    WHERE
+      id=$1
+    RETURNING *;  
+  `, [id]);
+
+  return routine;
+}
 
 module.exports = {
   getRoutineById,
