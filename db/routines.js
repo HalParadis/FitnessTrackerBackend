@@ -41,23 +41,36 @@ async function getAllRoutines() {
     JOIN 
       users AS u 
     ON 
-      u.id = r."creatorId"
-    JOIN 
-      (
-        SELECT
-          a.*, ra.id AS "routineActivityId", ra."routineId",
-          ra.duration, ra.count
-        FROM 
-          activities AS a
-        JOIN
-          routines_activities AS ra
-        ON
-          ra."activityId" = a.id
-      ) AS activities
-    ON 
-      activities."routineId" = r.id;
-  `)
-  return routines;
+      u.id = r."creatorId";
+  `);
+
+  const routinesWithActivities = await Promise.all(
+    routines.map(
+      async routine => {
+        const activities = await getAllActivitiesForRoutineId(routine.id);
+        routine.activities = activities;
+        return routine;
+  }));
+    
+  return routinesWithActivities;
+}
+
+async function getAllActivitiesForRoutineId(routineId) {
+  const {rows: activities} = await client.query(`
+    SELECT
+      a.*, ra.id AS "routineActivityId", ra."routineId",
+      ra.duration, ra.count
+    FROM 
+      activities AS a
+    JOIN
+      routines_activities AS ra
+    ON
+      ra."activityId" = a.id
+    WHERE
+      ra."routineId" = $1;
+  `, [routineId]);
+  
+  return activities;
 }
 
 async function getAllPublicRoutines() {}
