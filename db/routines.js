@@ -35,12 +35,27 @@ async function getRoutinesWithoutActivities() {
 async function getAllRoutines() {
   const { rows: routines } = await client.query(`
     SELECT 
-      r.*, a.*, ra."routineId", ra."activityId", 
-      ra.duration, ra.count, u.username as "creatorName" 
-    FROM routines r
-    JOIN users u ON u.id = r."creatorId"
-    JOIN routines_activities ra ON ra."routineId" = r.id
-    JOIN activities a ON ra."activityId" = a.id;
+      r.*, u.username AS "creatorName" 
+    FROM 
+      routines AS r
+    JOIN 
+      users AS u 
+    ON 
+      u.id = r."creatorId"
+    JOIN 
+      (
+        SELECT
+          a.*, ra.id AS "routineActivityId", ra."routineId",
+          ra.duration, ra.count
+        FROM 
+          activities AS a
+        JOIN
+          routines_activities AS ra
+        ON
+          ra."activityId" = a.id
+      ) AS activities
+    ON 
+      activities."routineId" = r.id;
   `)
   return routines;
 }
