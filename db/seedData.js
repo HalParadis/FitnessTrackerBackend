@@ -8,6 +8,26 @@ const {
   getRoutinesWithoutActivities,
   getAllActivities,
   addActivityToRoutine,
+
+  getActivityById,
+  getActivityByName,
+  updateActivity,
+  getRoutineActivityById,
+  getRoutineActivitiesByRoutine,
+  updateRoutineActivity,
+  destroyRoutineActivity,
+  canEditRoutineActivity,
+  getRoutineById,
+  getAllRoutines,
+  getAllPublicRoutines,
+  getAllRoutinesByUser,
+  getPublicRoutinesByUser,
+  getPublicRoutinesByActivity,
+  updateRoutine,
+  destroyRoutine,
+  getUser,
+  getUserById,
+  getUserByUsername
 } = require('../db');
 
 async function dropTables() {
