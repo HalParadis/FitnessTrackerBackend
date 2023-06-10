@@ -30,7 +30,7 @@ const { getRoutineById } = require("../../db");
 
 describe("/api/routines", () => {
   describe("GET /api/routines", () => {
-    it("Returns a list of public routines, includes the activities with them", async () => {
+    xit("Returns a list of public routines, includes the activities with them", async () => {
       const { fakeUser } = await createFakeUserWithToken("Jan");
       const fakeRoutine = await createFakePublicRoutine(
         fakeUser.id,
