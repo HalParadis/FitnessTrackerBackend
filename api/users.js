@@ -16,7 +16,6 @@ const {
 
 // POST /api/users/register
 router.post('/register', async (req, res, next) => {
-  //console.log("req.body", req.body);
 
   try {
     const { username, password } = req.body;
@@ -54,7 +53,6 @@ router.post('/register', async (req, res, next) => {
       expiresIn: '1w'
     });
 
-    //console.log("here for User", user);
     res.send({
       user,
       message: "Thank you for registering",
@@ -94,61 +92,85 @@ router.post('/login', async (req, res, next) => {
 });
 
 // GET /api/users/me
-router.get('/me', requireUser, async (req, res, next) => {
-  // const prefix = 'Bearer ';
-  // const auth = req.header('Authorization');
+router.get('/me', async (req, res, next) => {
+  const prefix = 'Bearer ';
+  const auth = req.header('Authorization');
 
-
-  try {
-    res.send(req.user);
-
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
-
-
-  // if (!auth) {
-  //   res.status(401);
-  //   res.send({
-  //     error: 'Invalid token!',
-  //     name: "InvalidTokenError",
-  //     message: "You must be logged in to perform this action"
-  //   });
-   
-  // } else if (auth.startsWith(prefix)) {
+  // try {
   //   const token = auth.slice(prefix.length);
+  //   const { id } = jwt.verify(token, JWT_SECRET);
+  //   const user = await getUserById(id);
 
-  //   try {
-  //     const { id } = jwt.verify(token, JWT_SECRET);
-  
-  //     if (id) {
-  //       const user = await getUserById(id);
-  //       console.log("User is set: ", user);
- 
-  //       res.send(user);
-  //     }
+  //   console.log('user', user);
 
-  //   } catch ({ name, message }) {
-  //     next({ name, message });
-  //   }
+  //   res.send({message: 'hello world'});
 
-  // } else {
-  //   next({
-  //     name: 'AuthorizationHeaderError',
-  //     message: `Authorizaiton token must start with ${prefix}`
-  //   });
+  // } catch ({ name, message }) {
+  //   next({ name, message });
   // }
+
+
+  if (!auth) {
+    res.status(401);
+    res.send({
+      error: 'Invalid token!',
+      name: "InvalidTokenError",
+      message: "You must be logged in to perform this action"
+    });
+   
+  } else if (auth.startsWith(prefix)) {
+    const token = auth.slice(prefix.length);
+
+    try {
+      const { id } = jwt.verify(token, JWT_SECRET);
+  
+      if (id) {
+        const user = await getUserById(id);
+        res.send(user);
+      }
+
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+
+  } else {
+    next({
+      name: 'AuthorizationHeaderError',
+      message: `Authorizaiton token must start with ${prefix}`
+    });
+  }
 
 
 });
 
 // GET /api/users/:username/routines
 router.get('/:username/routines', async (req, res, next) => {
-  const { username, password } = req. body;
-  const publicRoutinesByUser = await getAllRoutinesByUser(username);
+  const prefix = 'Bearer ';
+  const auth = req.header('Authorization');
+  const { username } = req.params;
+  const routines = await getAllRoutinesByUser({ username });
+  const token = auth.slice(prefix.length);
+  const { id } = jwt.verify(token, JWT_SECRET);
 
-  res.send(publicRoutinesByUser)
+  if (!auth || routines[0].creatorId != id) {
+    res.send(routines.filter(routine => routine.isPublic));
+  }
+  else if (auth.startsWith(prefix)) {
+    try {
+      if (id) {
+        res.send(routines);
+      }
 
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+
+  } else {
+    next({
+      name: 'AuthorizationHeaderError',
+      message: `Authorizaiton token must start with ${prefix}`
+    });
+  }
 })
 
 module.exports = router;

@@ -24,9 +24,7 @@ async function requireUser(req, res, next) {
       const { id } = jwt.verify(token, JWT_SECRET);
   
       if (id) {
-        const req.user = await getUserById(id);
-
-        console.log("User is set: ", user);
+        await getUserById(id);
  
         next();
       }
