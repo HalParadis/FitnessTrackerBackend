@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const { requireUser } = require('./utils');
 
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
@@ -10,7 +10,7 @@ const {
   getUserByUsername,
   createUser,
   getUser,
-  getPublicRoutinesByUser,
+  getAllRoutinesByUser,
   getUserById
 } = require('../db');
 
@@ -94,52 +94,61 @@ router.post('/login', async (req, res, next) => {
 });
 
 // GET /api/users/me
-router.get('/me', async (req, res, next) => {
-  const prefix = 'Bearer ';
-  const auth = req.header('Authorization');
+router.get('/me', requireUser, async (req, res, next) => {
+  // const prefix = 'Bearer ';
+  // const auth = req.header('Authorization');
 
-  if (!auth) {
-    res.status(401);
-    res.send({
-      error: 'Invalid token!',
-      name: "InvalidTokenError",
-      message: "You must be logged in to perform this action"
-    });
-   
-  } else if (auth.startsWith(prefix)) {
-    const token = auth.slice(prefix.length);
 
-    try {
-      const { id } = jwt.verify(token, JWT_SECRET);
-  
-      if (id) {
-        const user = await getUserById(id);
-        console.log("User is set: ", user);
- 
-        res.send(user);
-      }
+  try {
+    res.send(req.user);
 
-    } catch ({ name, message }) {
-      next({ name, message });
-    }
-
-  } else {
-    next({
-      name: 'AuthorizationHeaderError',
-      message: `Authorizaiton token must start with ${prefix}`
-    });
+  } catch ({ name, message }) {
+    next({ name, message });
   }
+
+
+  // if (!auth) {
+  //   res.status(401);
+  //   res.send({
+  //     error: 'Invalid token!',
+  //     name: "InvalidTokenError",
+  //     message: "You must be logged in to perform this action"
+  //   });
+   
+  // } else if (auth.startsWith(prefix)) {
+  //   const token = auth.slice(prefix.length);
+
+  //   try {
+  //     const { id } = jwt.verify(token, JWT_SECRET);
+  
+  //     if (id) {
+  //       const user = await getUserById(id);
+  //       console.log("User is set: ", user);
+ 
+  //       res.send(user);
+  //     }
+
+  //   } catch ({ name, message }) {
+  //     next({ name, message });
+  //   }
+
+  // } else {
+  //   next({
+  //     name: 'AuthorizationHeaderError',
+  //     message: `Authorizaiton token must start with ${prefix}`
+  //   });
+  // }
 
 
 });
 
 // GET /api/users/:username/routines
-// router.get('/:username/routines', async (req, res, next) => {
-//   const { username, password } = req. body;
-//   const publicRoutinesByUser = await getPublicRoutinesByUser(username);
+router.get('/:username/routines', async (req, res, next) => {
+  const { username, password } = req. body;
+  const publicRoutinesByUser = await getAllRoutinesByUser(username);
 
-//   res.send(publicRoutinesByUser)
+  res.send(publicRoutinesByUser)
 
-// })
+})
 
 module.exports = router;
