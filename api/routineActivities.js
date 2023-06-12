@@ -32,7 +32,6 @@ router.patch('/:routineActivityId', async (req, res, next) => {
       const { id, username } = jwt.verify(token, JWT_SECRET);
       const { count, duration } = req.body;
 
-      //const unmodifiedRoutineActivity = await updateRoutineActivity(routineActivityId);
       const { routineId } = await getRoutineActivityById(routineActivityId);
       const { creatorId, name } = await getRoutineById(routineId);
 
