@@ -8,7 +8,6 @@ const {
   destroyRoutineActivity,
   getRoutineActivitiesByRoutine,
   addActivityToRoutine,
-  createActivity
 } = require('../db');
 const router = express.Router();
 
