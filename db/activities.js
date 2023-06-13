@@ -52,9 +52,6 @@ async function updateActivity( { id, ...fields } ) {
   // don't try to update the id
   // do update the name and description
   // return the updated activity
-
-  //QUESTION - spread on the object fields -meaning -?
-  //console.log("here", fields);
   const setString = Object.keys(fields).map(
     (key, index) => `"${ key }"=$${ index + 1 }`
   ).join(', ');

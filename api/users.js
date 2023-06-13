@@ -96,20 +96,6 @@ router.get('/me', async (req, res, next) => {
   const prefix = 'Bearer ';
   const auth = req.header('Authorization');
 
-  // try {
-  //   const token = auth.slice(prefix.length);
-  //   const { id } = jwt.verify(token, JWT_SECRET);
-  //   const user = await getUserById(id);
-
-  //   console.log('user', user);
-
-  //   res.send({message: 'hello world'});
-
-  // } catch ({ name, message }) {
-  //   next({ name, message });
-  // }
-
-
   if (!auth) {
     res.status(401);
     res.send({

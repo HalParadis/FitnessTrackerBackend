@@ -10,6 +10,7 @@ const {
   getRoutineById,
   destroyRoutineActivity
 } = require('../db');
+
 // PATCH /api/routine_activities/:routineActivityId
 router.patch('/:routineActivityId', async (req, res, next) => {
   const prefix = 'Bearer ';

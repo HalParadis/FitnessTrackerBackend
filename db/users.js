@@ -36,8 +36,6 @@ async function getUser({ username, password }) {
   if (passwordsMatch) {
     delete user.password;
     return user;
-  // } else {
-  //   throw new Error('Incorrect password');
   }
 }
 
