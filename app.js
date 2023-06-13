@@ -19,7 +19,10 @@ app.use('/api', apiRouter);
 // Create custom 404 handler that sets the status code to 404.
 apiRouter.use('*', (req, res, next) => {
   res.status(404);
-  res.send({error: 'Route not found'});
+  res.send({
+    error: 'RouteNotFoundError',
+    message: 'Route not found'
+  });
 });
 
 // Create custom error handling that sets the status code to 500
