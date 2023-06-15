@@ -1,6 +1,6 @@
 const express = require('express'); 
-const { 
-  getAllRoutines, 
+const {  
+  getAllPublicRoutines,
   createRoutine,
   updateRoutine, 
   getRoutineById,
@@ -17,7 +17,7 @@ const { JWT_SECRET } = process.env;
 // GET /api/routines
 router.get('/', async (req, res, next) => {
   try {
-    const routines = await getAllRoutines();
+    const routines = await getAllPublicRoutines();
     res.send(routines);
   }
   catch (error) {

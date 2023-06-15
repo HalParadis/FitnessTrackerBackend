@@ -3,10 +3,6 @@ const express = require("express")
 const app = express()
 
 // Setup your Middleware and API Router here
-const { 
-  getUserById
-} = require('./db');
-
 const cors = require('cors');
 app.use(cors());
 
