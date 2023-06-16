@@ -25,7 +25,7 @@ apiRouter.use('*', (req, res, next) => {
 // and returns the error as an object
 apiRouter.use((err, req, res, next) => {
   res.status(500);
-  res.send({err});
+  res.send(err);
 });
 
 
