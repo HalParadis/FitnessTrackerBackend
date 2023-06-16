@@ -37,6 +37,9 @@ async function getUser({ username, password }) {
     delete user.password;
     return user;
   }
+  else {
+    throw new Error('Incorrect Password');
+  }
 }
 
 async function getUserById(userId) {
