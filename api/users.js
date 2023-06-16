@@ -32,6 +32,7 @@ router.post('/register', async (req, res, next) => {
     }
 
     if (password.length < 8) {
+      // FIXME: user is still created even if this happens
       //why is res.send used? instead of "next"
       res.send({
         error: "PasswordTooShort",
